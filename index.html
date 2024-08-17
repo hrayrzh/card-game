@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Scratch Card Game</title>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #f0f0f0;
+        }
+
+        .container {
+            text-align: center;
+        }
+
+        .scratch-card {
+            display: grid;
+            grid-template-columns: repeat(3, 100px);
+            grid-gap: 10px;
+            margin: 20px auto;
+        }
+
+        .scratch-card div {
+            width: 100px;
+            height: 100px;
+            background-color: #ccc;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 24px;
+            font-weight: bold;
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .scratch-card div.revealed {
+            background-color: #fff;
+            border: 2px solid #ddd;
+            cursor: default;
+        }
+
+        #playAgain {
+            margin-top: 20px;
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+
+        #resultMessage {
+            margin-top: 20px;
+            font-size: 18px;
+            font-weight: bold;
+        }
+
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1>Scratch Card Game</h1>
+    <div class="scratch-card" id="scratchCard"></div>
+    <button id="playAgain">Play Again</button>
+    <p id="resultMessage"></p>
+</div>
+
+<script>
+    const symbols = ['$', '#', '@', '*'];
+    const scratchCard = document.getElementById('scratchCard');
+    const playAgainButton = document.getElementById('playAgain');
+    const resultMessage = document.getElementById('resultMessage');
+
+    // Generate the scratch card
+    function generateScratchCard() {
+        const card = [];
+        for (let i = 0; i < 3; i++) {
+            card[i] = [];
+            for (let j = 0; j < 3; j++) {
+                card[i][j] = symbols[Math.floor(Math.random() * symbols.length)];
+            }
+        }
+        return card;
+    }
+
+    // Display the scratch card
+    function displayScratchCard(card) {
+        scratchCard.innerHTML = '';
+        for (let i = 0; i < 3; i++) {
+            for (let j = 0; j < 3; j++) {
+                const cell = document.createElement('div');
+                cell.dataset.symbol = card[i][j];
+                cell.addEventListener('click', revealSymbol);
+                scratchCard.appendChild(cell);
+            }
+        }
+    }
+
+    // Reveal the symbol when clicked
+    function revealSymbol() {
+        if (!this.classList.contains('revealed')) {
+            this.classList.add('revealed');
+            this.textContent = this.dataset.symbol;
+            checkWin();
+        }
+    }
+
+    // Check if the player wins
+    function checkWin() {
+        const cells = Array.from(scratchCard.children);
+        const grid = [
+            [cells[0], cells[1], cells[2]],
+            [cells[3], cells[4], cells[5]],
+            [cells[6], cells[7], cells[8]]
+        ];
+
+        // Check rows and columns
+        for (let i = 0; i < 3; i++) {
+            if (grid[i][0].textContent === grid[i][1].textContent && grid[i][1].textContent === grid[i][2].textContent && grid[i][0].classList.contains('revealed')) {
+                showResult('Congratulations! You win!');
+                return;
+            }
+            if (grid[0][i].textContent === grid[1][i].textContent && grid[1][i].textContent === grid[2][i].textContent && grid[0][i].classList.contains('revealed')) {
+                showResult('Congratulations! You win!');
+                return;
+            }
+        }
+        // Check diagonals
+        if (grid[0][0].textContent === grid[1][1].textContent && grid[1][1].textContent === grid[2][2].textContent && grid[0][0].classList.contains('revealed')) {
+            showResult('Congratulations! You win!');
+            return;
+        }
+        if (grid[0][2].textContent === grid[1][1].textContent && grid[1][1].textContent === grid[2][0].textContent && grid[0][2].classList.contains('revealed')) {
+            showResult('Congratulations! You win!');
+            return;
+        }
+    }
+
+    // Display the result
+    function showResult(message) {
+        resultMessage.textContent = message;
+        Array.from(scratchCard.children).forEach(cell => {
+            cell.removeEventListener('click', revealSymbol);
+            cell.classList.add('revealed');
+            cell.textContent = cell.dataset.symbol;
+        });
+    }
+
+    // Start a new game
+    function startGame() {
+        resultMessage.textContent = '';
+        const card = generateScratchCard();
+        displayScratchCard(card);
+    }
+
+    // Event listeners
+    playAgainButton.addEventListener('click', startGame);
+
+    // Initialize the game
+    startGame();
+
+</script>
+</body>
+</html>
